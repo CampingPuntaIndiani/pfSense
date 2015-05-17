@@ -392,6 +392,18 @@ if ($_POST['save']) {
     /* enbale ticket printout & creation log */
     $ticket = true;
     /* pfSenseHeader("system_usermanager.php"); */
+
+    /* Log to file */
+    if ($accounts_wal = fopen("accounts_wal.txt", "a+")) {
+      $row = implode(',', array(
+        (new DateTime('NOW'))->format('c'),
+        $userent['name'],
+        $pconfig['expires_ndays'] ?  $pconfig['expires_ndays'] : '-',
+        $userent['expires']
+      ))."\r\n";
+      fwrite($accounts_wal, $row);
+      fclose($accounts_wal);
+    }
 	}
 }
 
@@ -406,7 +418,7 @@ include("head.inc");
 <script type="text/javascript">
 //<![CDATA[
 	jQuery(function() {
-		jQuery( "#expires" ).datepicker( { dateFormat: 'yyyy-mm-dd', changeYear: true, yearRange: "+0:+100" } );
+		// jQuery( "#expires" ).datepicker( { dateFormat: 'yyyy-mm-dd', changeYear: true, yearRange: "+0:+100" } );
 	});
 //]]>
 </script>
@@ -609,7 +621,7 @@ function sshkeyClicked(obj) {
 <?php
 			if ($_POST['act'] == "new" || $_POST['act'] == "edit" || $input_errors):
 ?>
-				<form action="system_usermanager.php" method="post" name="iform" id="iform" onsubmit="presubmit()">
+				<form action="system_usermanager.php" method="post" name="iform" id="iform" onsubmit="presubmit()" autocomplete="off">
 					<input type="hidden" id="act" name="act" value="" />
 					<input type="hidden" id="userid" name="userid" value="<?=(isset($id) ? $id : '');?>" />
 					<input type="hidden" id="privid" name="privid" value="" />
@@ -643,12 +655,12 @@ function sshkeyClicked(obj) {
 						<tr>
 							<td width="22%" valign="top" class="vncellreq" rowspan="2"><?=gettext("Password");?></td>
 							<td width="78%" class="vtable">
-								<input name="passwordfld1" type="password" class="formfld pwd" id="passwordfld1" size="20" value="" />
+								<input name="passwordfld1" type="password" class="formfld pwd" id="passwordfld1" size="20" value="" autocomplete="off"/>
 							</td>
 						</tr>
 						<tr>
 							<td width="78%" class="vtable">
-								<input name="passwordfld2" type="password" class="formfld pwd" id="passwordfld2" size="20" value="" />&nbsp;<?= gettext("(confirmation)"); ?>
+								<input name="passwordfld2" type="password" class="formfld pwd" id="passwordfld2" size="20" value="" autocomplete="off"/>&nbsp;<?= gettext("(confirmation)"); ?>
 							</td>
 						</tr>
 						<tr>
@@ -668,9 +680,9 @@ function sshkeyClicked(obj) {
 						<tr>
 							<td width="22%" valign="top" class="vncell"><?=gettext("Expiration date"); ?></td>
 							<td width="78%" class="vtable">
-								<input name="expires" type="text" class="formfld unknown" id="expires" size="10" value="<?=htmlspecialchars($pconfig['expires']);?>" /> [midnight]
+								<input name="expires" type="text" class="formfld unknown" id="expires" size="25" value="<?=htmlspecialchars($pconfig['expires']);?>" />
 								<br />
-								<span class="vexpl"><?=gettext("Leave blank if the account shouldn't expire, otherwise enter the expiration date in the following format: yyyy-mm-dd"); ?></span></td>
+								<span class="vexpl"><?=gettext("Leave blank if the account shouldn't expire, otherwise enter the expiration date in the following format: 2015-05-19T15:32:58+02:00"); ?></span></td>
 						</tr>
 						<tr>
 							<td width="22%" valign="top" class="vncell"><?=gettext("Group Memberships");?></td>
