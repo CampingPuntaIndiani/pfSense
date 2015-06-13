@@ -266,7 +266,8 @@ if ($_POST['save']) {
 	}
 
   /* expires in ? days: hack <martin.brugnara@gmail.com> */
-  if ($_POST['expires_ndays'] && !$_POST['expires']) {
+  if (isset($_POST['expires_ndays']) && strlen(trim($_POST['expires_ndays'])) > 0)
+  {
     $days = intval($_POST['expires_ndays']);
     if ($days == 0 && trim($_POST['expires_ndays']) != "0") {
 			$input_errors[] = gettext("Invalid expiration in ndays value; use integer instead.");
@@ -398,7 +399,8 @@ if ($_POST['save']) {
       $row = implode(',', array(
         (new DateTime('NOW'))->format('c'),
         $userent['name'],
-        $pconfig['expires_ndays'] ?  $pconfig['expires_ndays'] : '-',
+        isset($pconfig['expires_ndays']) && strlen($pconfig['expires_ndays']) ?
+          $pconfig['expires_ndays'] : '-',
         $userent['expires']
       ))."\r\n";
       fwrite($accounts_wal, $row);
@@ -1148,7 +1150,7 @@ function sshkeyClicked(obj) {
 
         // Auto add WI-FI group
         var group = group_prefix + (new Date().getFullYear());
-        document.querySelector('option[value="wifi2015"]').selected = true;
+        document.querySelector('option[value="' + group + '"]').selected = true;
         move_selected('notgroups','groups');
 
         // Expires days added via to PHP (avoid date-time sync issue)
