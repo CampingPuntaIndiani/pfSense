@@ -456,6 +456,7 @@ input[type=submit].handle-me {
   body {
     font-size: 14px;
     font-family: "Helvetica Neue", Arial, sans-serif;
+    background: none;
   }
 }
 </style>
