@@ -501,7 +501,7 @@ input[type=submit].handle-me {
 
 <span class="pre">username: <?= $userent['name'] ?></span>
 <span class="pre">password: <?= $pconfig['passwordfld1'] ?></span>
-<span class="pre">expires:  <?= (new DateTime($userent['expires']))->format('c') ?></span>
+<span class="pre">expires:  <?= strlen($userent['expires']) > 0 ? (new DateTime($userent['expires']))->format('c') : "NEVER" ?></span>
   </p>
 </body>
 <?php
@@ -1135,29 +1135,52 @@ function sshkeyClicked(obj) {
   <script type="text/javascript">
     <!-- Simplify user management -->
       (function(){
-        // Do nothing in edit mode.
-        if (document.getElementById("userid").value.length) return;
+
+        // Do not patch list view.
+        if (document.getElementById('passwordfld1') === null) return;
 
         // Settings
         var pwd_len = 5,
           group_prefix = "wifi";
 
-        // Generate Password
-        var pwd=0;
-        for (var i=0; i<5; i++) pwd = pwd * 10 + Math.floor(Math.random()*10);
-        // Set Password
-        document.getElementById('passwordfld1').value = pwd;
-        document.getElementById('passwordfld2').value = pwd;
+        if (!document.getElementById("userid").value.length) {
+          // Do nothing in edit mode.
 
-        // Auto add WI-FI group
-        var group = group_prefix + (new Date().getFullYear());
-        document.querySelector('option[value="' + group + '"]').selected = true;
-        move_selected('notgroups','groups');
+          // Generate Password
+          var pwd='';
+          for (var i=0; i<pwd_len; i++) pwd += ('' + Math.floor(Math.random()*10));
 
-        // Expires days added via to PHP (avoid date-time sync issue)
+          // Set Password
+          document.getElementById('passwordfld1').value = pwd;
+          document.getElementById('passwordfld2').value = pwd;
 
+          // Auto add WI-FI group
+          var group = group_prefix + (new Date().getFullYear());
+          document.querySelector('option[value="' + group + '"]').selected = true;
+          move_selected('notgroups','groups');
+
+          // NOTE:
+          // Expires days added via to PHP (avoid date-time sync issue)
+        }
+
+        document.getElementById('expires_ndays').onchange = function () {
+          // auto unselect disabled
+          var val = document.getElementById('expires_ndays').value, n = parseInt(val);
+          if (val.length !== 0)
+            document.getElementById('disabled').checked = (isNaN(n) || n === 0);
+        };
+
+        window.old_exp = document.getElementById('expires').value;
+        window.old_dis = document.getElementById('disabled').checked;
+
+        document.getElementById('expires').onchange = function () {
+          var val = document.getElementById('expires').value,
+            e = new Date(val);
+          if (window.old_exp !== val && val.length !== 0)
+              document.getElementById('disabled').checked = (isNaN(e) || e <= new Date());
+          window.old_exp = val;
+        };
       })();
   </script>
-
 </body>
 </html>
